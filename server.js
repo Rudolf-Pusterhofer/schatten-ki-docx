@@ -128,7 +128,20 @@ app.post('/generate', async function(req,res){
       ]}),
       ...[1,2,3,4,5,6,7,8,9,10,11,12].map(function(i){
         const key = 'F'+(i<10?'0':'')+i;
-        const antwort = antworten[key]||'';
+       const antworten = {
+  F01: d.F01 || '',
+  F02: d.F02 || '',
+  F03: d.F03 || '',
+  F04: d.F04 || '',
+  F05: d.F05 || '',
+  F06: d.F06 || '',
+  F07: d.F07 || '',
+  F08: d.F08 || '',
+  F09: d.F09 || '',
+  F10: d.F10 || '',
+  F11: d.F11 || '',
+  F12: d.F12 || ''
+};
         const ac = ampelFarbe(antwort);
         const af = ampelFill(antwort);
         return new TableRow({children:[
