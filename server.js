@@ -112,21 +112,8 @@ app.post('/generate', async function(req,res){
     const ec = einstufungFarbe(einstufung);
     const ef = einstufungFill(einstufung);
 
-    // ✅ FIX: antworten einmal definieren, direkt aus d.F01...F12
-    const antworten = {
-      F01: d.F01 || '',
-      F02: d.F02 || '',
-      F03: d.F03 || '',
-      F04: d.F04 || '',
-      F05: d.F05 || '',
-      F06: d.F06 || '',
-      F07: d.F07 || '',
-      F08: d.F08 || '',
-      F09: d.F09 || '',
-      F10: d.F10 || '',
-      F11: d.F11 || '',
-      F12: d.F12 || ''
-    };
+    // ✅ FIX: Antworten kommen als verschachteltes Objekt von Make.com
+    const antworten = d.Antworten || d.antworten || {};
 
     const antwortenRows = [
       new TableRow({children:[
