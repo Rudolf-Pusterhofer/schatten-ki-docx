@@ -114,7 +114,7 @@ app.post('/generate', async function(req,res){
     const gelb = parseInt(d.unsicher || d.Unsachen || 0);
     const gruen = parseInt(d.geregelt || d.Geregelt || 0);
     const einstufung = d.einstufung||'Handlungsbedarf erkannt';
-    const ki_bericht = d.ki_bericht||'';
+    const ki_bericht = (d.ki_bericht||'').replace(/"/g, "'").replace(/\n/g, ' ');
     const antworten = d.antworten||{};
 
     const ec = einstufungFarbe(einstufung);
