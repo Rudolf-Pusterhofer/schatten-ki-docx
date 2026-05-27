@@ -40,13 +40,6 @@ function P(txt,opts){
 
 function SP(n){return new Paragraph({spacing:{before:0,after:n||120},children:[new TextRun({text:'',font:'Arial',size:20})]});}
 
-function HF(titel, text){
-  return [
-    new Paragraph({spacing:{before:180,after:60},children:[new TextRun({text:titel,font:'Arial',size:24,bold:true,color:DUNKEL})]}),
-    new Paragraph({spacing:{before:0,after:100},children:[new TextRun({text:text,font:'Arial',size:21,color:TEXT})]})
-  ];
-}
-
 function ampelFarbe(a){
   if(a==='Hier haben wir Nachholbedarf') return ROT;
   if(a==='Bin mir nicht sicher') return ORANGE;
@@ -114,11 +107,26 @@ app.post('/generate', async function(req,res){
     const gelb = parseInt(d.unsicher || d.Unsachen || 0);
     const gruen = parseInt(d.geregelt || d.Geregelt || 0);
     const einstufung = d.einstufung||'Handlungsbedarf erkannt';
-    const ki_bericht = (d.ki_bericht||'').replace(/"/g, "'").replace(/\n/g, ' ');
-    const antworten = d.antworten||{};
+    const ki_bericht = (d.ki_bericht||'').replace(/"/g, "'");
 
     const ec = einstufungFarbe(einstufung);
     const ef = einstufungFill(einstufung);
+
+    // ✅ FIX: antworten einmal definieren, direkt aus d.F01...F12
+    const antworten = {
+      F01: d.F01 || '',
+      F02: d.F02 || '',
+      F03: d.F03 || '',
+      F04: d.F04 || '',
+      F05: d.F05 || '',
+      F06: d.F06 || '',
+      F07: d.F07 || '',
+      F08: d.F08 || '',
+      F09: d.F09 || '',
+      F10: d.F10 || '',
+      F11: d.F11 || '',
+      F12: d.F12 || ''
+    };
 
     const antwortenRows = [
       new TableRow({children:[
@@ -128,20 +136,7 @@ app.post('/generate', async function(req,res){
       ]}),
       ...[1,2,3,4,5,6,7,8,9,10,11,12].map(function(i){
         const key = 'F'+(i<10?'0':'')+i;
-       const antworten = {
-  F01: d.F01 || '',
-  F02: d.F02 || '',
-  F03: d.F03 || '',
-  F04: d.F04 || '',
-  F05: d.F05 || '',
-  F06: d.F06 || '',
-  F07: d.F07 || '',
-  F08: d.F08 || '',
-  F09: d.F09 || '',
-  F10: d.F10 || '',
-  F11: d.F11 || '',
-  F12: d.F12 || ''
-};
+        const antwort = antworten[key] || '';  // ✅ FIX: aus antworten-Objekt holen
         const ac = ampelFarbe(antwort);
         const af = ampelFill(antwort);
         return new TableRow({children:[
