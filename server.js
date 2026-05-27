@@ -106,13 +106,13 @@ app.get('/', function(req,res){
 app.post('/generate', async function(req,res){
   try {
     const d = req.body;
-    const vorname = d.vorname||'';
-    const nachname = d.nachname||'';
+    const vorname = d.vorname || d.Vorname || '';
+    const nachname = d.nachname || d.Nachname || '';
     const email = d.email||'';
     const datum = d.datum||new Date().toLocaleDateString('de-AT');
-    const rot = d.nachholbedarf||0;
-    const gelb = d.unsicher||0;
-    const gruen = d.geregelt||0;
+    const rot = parseInt(d.nachholbedarf || d.Nachholbedarf || 0);
+    const gelb = parseInt(d.unsicher || d.Unsachen || 0);
+    const gruen = parseInt(d.geregelt || d.Geregelt || 0);
     const einstufung = d.einstufung||'Handlungsbedarf erkannt';
     const ki_bericht = d.ki_bericht||'';
     const antworten = d.antworten||{};
