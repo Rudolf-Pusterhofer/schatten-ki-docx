@@ -276,7 +276,7 @@ app.post('/generate', async function(req,res){
           }),
           SP(60),
           ...berichtAbsaetze(ki_bericht),
-          SP(200),
+          SP(600),
           P('Eisenstadt, '+datum,{size:20,color:TEXT_GRAU,after:160}),
           new Paragraph({spacing:{before:0,after:80},children:[new TextRun({text:anrede+' '+nachname+',',font:'Arial',size:23,color:TEXT})]}),
           SP(60),
