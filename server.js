@@ -79,17 +79,88 @@ const FRAGEN = [
 
 function berichtAbsaetze(text){
   if(!text) return [P('',{size:21})];
-  return text.split('\n').map(function(line){
-    line=line.trim();
-    if(!line) return SP(80);
+  var result = [];
+  var lines = text.split('\n');
+  var i = 0;
+  while(i < lines.length){
+    var line = lines[i].trim();
+    if(!line){ result.push(SP(80)); i++; continue; }
+
     if(line.match(/^HANDLUNGSFELD \d+:/)){
-      return new Paragraph({spacing:{before:180,after:60},children:[new TextRun({text:line,font:'Arial',size:24,bold:true,color:DUNKEL})]});
+      var m = line.match(/^(HANDLUNGSFELD \d+:)\s*(.*)/);
+      var titelNr = m ? m[1] : 'HANDLUNGSFELD:';
+      var titelText = m ? m[2] : line;
+      result.push(SP(120));
+      result.push(new Table({width:{size:9026,type:WidthType.DXA},columnWidths:[200,8826],borders:noBorders,
+        rows:[new TableRow({children:[
+          C([],{fill:GOLD,w:200,mt:0,mb:0}),
+          C([new Paragraph({spacing:{before:80,after:80},children:[
+            new TextRun({text:titelNr+' ',font:'Arial',size:20,bold:true,color:GOLD}),
+            new TextRun({text:titelText,font:'Arial',size:22,bold:true,color:DUNKEL})
+          ]})],{fill:GOLD_HELL,w:8826,ml:200})
+        ]})]
+      }));
+      i++;
+      var bodyLines = [];
+      while(i < lines.length){
+        var nx = lines[i].trim();
+        if(nx.match(/^(HANDLUNGSFELD \d+:|BLICK NACH VORNE|WAS NACH UNSEREM GESPR)/)) break;
+        if(nx) bodyLines.push(nx);
+        i++;
+      }
+      if(bodyLines.length > 0){
+        result.push(new Table({width:{size:9026,type:WidthType.DXA},columnWidths:[200,8826],borders:noBorders,
+          rows:[new TableRow({children:[
+            C([],{fill:GOLD,w:200,mt:0,mb:0}),
+            C(bodyLines.map(function(bl){return P(bl,{size:21,color:TEXT,after:80});}),
+              {fill:WEISS,w:8826,ml:200,b:{top:noBorder,bottom:thin(BORDER),left:noBorder,right:noBorder}})
+          ]})]
+        }));
+      }
+      continue;
     }
-    if(line.match(/^(BLICK NACH VORNE|WAS NACH UNSEREM GESPR)/)){
-      return new Paragraph({spacing:{before:180,after:60},children:[new TextRun({text:line,font:'Arial',size:22,bold:true,color:DUNKEL})]});
+
+    if(line.match(/^BLICK NACH VORNE/)){
+      result.push(SP(140));
+      var blickRows = [];
+      i++;
+      while(i < lines.length){
+        var nx = lines[i].trim();
+        if(nx.match(/^WAS NACH UNSEREM GESPR/)) break;
+        if(nx) blickRows.push(P(nx,{size:21,color:TEXT,after:80}));
+        i++;
+      }
+      result.push(new Table({width:{size:9026,type:WidthType.DXA},columnWidths:[9026],borders:noBorders,
+        rows:[new TableRow({children:[C([
+          new Paragraph({spacing:{before:80,after:60},children:[new TextRun({text:'Blick nach vorne',font:'Arial',size:22,bold:true,color:DUNKEL})]}),
+          ...blickRows
+        ],{fill:GRAU,w:9026,b:leftB(GOLD,8),ml:240,mr:240,mt:80,mb:80})]})]
+      }));
+      continue;
     }
-    return P(line,{size:21,color:TEXT,before:0,after:80});
-  });
+
+    if(line.match(/^WAS NACH UNSEREM GESPR/)){
+      result.push(SP(120));
+      var wasRows = [];
+      i++;
+      while(i < lines.length){
+        var nx = lines[i].trim();
+        if(nx) wasRows.push(P(nx,{size:21,color:TEXT,after:80}));
+        i++;
+      }
+      result.push(new Table({width:{size:9026,type:WidthType.DXA},columnWidths:[9026],borders:noBorders,
+        rows:[new TableRow({children:[C([
+          new Paragraph({spacing:{before:80,after:60},children:[new TextRun({text:'Was nach unserem Gespräch anders ist',font:'Arial',size:22,bold:true,color:DUNKEL})]}),
+          ...wasRows
+        ],{fill:GOLD_HELL,w:9026,b:leftB(GOLD,8),ml:240,mr:240,mt:80,mb:80})]})]
+      }));
+      continue;
+    }
+
+    result.push(P(line,{size:21,color:TEXT,before:0,after:80}));
+    i++;
+  }
+  return result;
 }
 
 app.get('/', function(req,res){
@@ -106,9 +177,10 @@ app.post('/generate', async function(req,res){
     const rot = Number(d.nachholbedarf || d.Nachholbedarf || 0) || 0;
     const gelb = Number(d.unsicher || d.Unsicher || 0) || 0;
     const gruen = Number(d.geregelt || d.Geregelt || 0) || 0;
-    console.log('DEBUG:', JSON.stringify({rot, gelb, gruen, keys: Object.keys(d)}));
+    const gesamt = rot + gelb + gruen;
     const einstufung = d.einstufung||'Handlungsbedarf erkannt';
     const ki_bericht = (d.ki_bericht||'').replace(/"/g, "'");
+    const anrede = ki_bericht.match(/Sehr geehrte Frau/) ? 'Sehr geehrte Frau' : 'Sehr geehrter Herr';
 
     const ec = einstufungFarbe(einstufung);
     const ef = einstufungFill(einstufung);
@@ -188,13 +260,11 @@ app.post('/generate', async function(req,res){
             rows:[new TableRow({children:[C([],{fill:GOLD,w:200,mt:0,mb:0}),C([P('Ihr pers\u00F6nlicher KI-Bericht',{size:20,bold:true,color:DUNKEL,before:80,after:80})],{fill:GOLD_HELL,w:8826,ml:200})]})]
           }),
           SP(60),
-          new Table({width:{size:9026,type:WidthType.DXA},columnWidths:[9026],borders:noBorders,
-            rows:[new TableRow({children:[C(berichtAbsaetze(ki_bericht),{fill:GRAU,w:9026,b:leftB(GOLD,8),ml:240,mr:240,mt:100,mb:100})]})]
-          }),
+          ...berichtAbsaetze(ki_bericht),
           new Paragraph({children:[new PageBreak()]}),
           SP(200),
           P('Eisenstadt, '+datum,{size:20,color:TEXT_GRAU,after:160}),
-          new Paragraph({spacing:{before:0,after:80},children:[new TextRun({text:'Sehr geehrte/r Herr/Frau '+nachname+',',font:'Arial',size:23,color:TEXT})]}),
+          new Paragraph({spacing:{before:0,after:80},children:[new TextRun({text:anrede+' '+nachname+',',font:'Arial',size:23,color:TEXT})]}),
           SP(60),
           P('Ihr Check-Ergebnis liegt mir vor. Ich m\u00F6chte Ihnen anbieten, was ich in 30 Jahren immer als wirksamsten ersten Schritt erlebt habe:',{size:21,color:TEXT,after:100}),
           SP(100),
