@@ -287,7 +287,7 @@ app.post('/generate', async function(req,res){
               new Paragraph({alignment:AlignmentType.CENTER,spacing:{before:140,after:80},children:[new TextRun({text:'Ein Gespr\u00E4ch. 30 Minuten. Kostenlos.',font:'Arial',size:26,bold:true,color:DUNKEL})]}),
               P('Kein Verkaufsgespr\u00E4ch. Keine Verpflichtung. Keine Pr\u00E4sentation.',{size:18,italic:true,color:TEXT_GRAU,align:AlignmentType.CENTER,after:80}),
               P('Ich zeige Ihnen, welche drei Schritte in Ihrem Unternehmen sofort den gr\u00F6\u00DFten Unterschied machen.',{size:20,color:TEXT,align:AlignmentType.CENTER,after:100}),
-              new Paragraph({alignment:AlignmentType.CENTER,spacing:{before:80,after:140},children:[new TextRun({text:'calendly.com/pusterhofer',font:'Arial',size:22,bold:true,color:TEXT})]}),
+              new Paragraph({alignment:AlignmentType.CENTER,spacing:{before:80,after:140},children:[new TextRun({text:'calendly.com/pusterhofer/wahlen-sie-ihren-termin',font:'Arial',size:22,bold:true,color:TEXT})]}),
             ],{fill:GOLD_HELL,w:9026,b:{top:thin(GOLD),bottom:thin(GOLD),left:{style:BorderStyle.SINGLE,size:12,color:GOLD},right:thin(GOLD)},ml:300,mr:300})]})]
           }),
           SP(200),
