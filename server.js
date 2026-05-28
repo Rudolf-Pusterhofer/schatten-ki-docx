@@ -82,23 +82,37 @@ function berichtAbsaetze(text){
   var result = [];
   var lines = text.split('\n');
   var i = 0;
+  var handlungsfelderGezeigt = false;
+
   while(i < lines.length){
     var line = lines[i].trim();
     if(!line){ result.push(SP(80)); i++; continue; }
+
+    // Vor erstem HANDLUNGSFELD: Überschrift "Ihre 3 wichtigsten Handlungsfelder" einfügen
+    if(line.match(/^HANDLUNGSFELD 1:/) && !handlungsfelderGezeigt){
+      handlungsfelderGezeigt = true;
+      result.push(SP(160));
+      result.push(new Table({width:{size:9026,type:WidthType.DXA},columnWidths:[200,8826],borders:noBorders,
+        rows:[new TableRow({children:[
+          C([],{fill:GOLD,w:200,mt:0,mb:0}),
+          C([P('Ihre 3 wichtigsten Handlungsfelder',{size:20,bold:true,color:DUNKEL,before:80,after:80})],{fill:GOLD_HELL,w:8826,ml:200})
+        ]})]
+      }));
+      result.push(SP(40));
+    }
 
     if(line.match(/^HANDLUNGSFELD \d+:/)){
       var m = line.match(/^(HANDLUNGSFELD \d+:)\s*(.*)/);
       var titelNr = m ? m[1] : 'HANDLUNGSFELD:';
       var titelText = m ? m[2] : line;
-      result.push(SP(120));
-      result.push(new Table({width:{size:9026,type:WidthType.DXA},columnWidths:[200,8826],borders:noBorders,
-        rows:[new TableRow({children:[
-          C([],{fill:GOLD,w:200,mt:0,mb:0}),
-          C([new Paragraph({spacing:{before:80,after:80},children:[
+      // Titelzeile: dunkler Hintergrund, goldene Nummer, weisser Titeltext
+      result.push(new Table({width:{size:9026,type:WidthType.DXA},columnWidths:[9026],borders:noBorders,
+        rows:[new TableRow({children:[C([
+          new Paragraph({spacing:{before:80,after:80},children:[
             new TextRun({text:titelNr+' ',font:'Arial',size:20,bold:true,color:GOLD}),
-            new TextRun({text:titelText,font:'Arial',size:22,bold:true,color:DUNKEL})
-          ]})],{fill:GOLD_HELL,w:8826,ml:200})
-        ]})]
+            new TextRun({text:titelText,font:'Arial',size:22,bold:true,color:WEISS})
+          ]})
+        ],{fill:DUNKEL,w:9026,ml:240,mr:240})]})]
       }));
       i++;
       var bodyLines = [];
@@ -109,19 +123,20 @@ function berichtAbsaetze(text){
         i++;
       }
       if(bodyLines.length > 0){
-        result.push(new Table({width:{size:9026,type:WidthType.DXA},columnWidths:[200,8826],borders:noBorders,
-          rows:[new TableRow({children:[
-            C([],{fill:GOLD,w:200,mt:0,mb:0}),
-            C(bodyLines.map(function(bl){return P(bl,{size:21,color:TEXT,after:80});}),
-              {fill:WEISS,w:8826,ml:200,b:{top:noBorder,bottom:thin(BORDER),left:noBorder,right:noBorder}})
-          ]})]
+        result.push(new Table({width:{size:9026,type:WidthType.DXA},columnWidths:[9026],borders:noBorders,
+          rows:[new TableRow({children:[C(
+            bodyLines.map(function(bl){return P(bl,{size:21,color:TEXT,after:80});}),
+            {fill:GOLD_HELL,w:9026,ml:240,mr:240,b:{top:noBorder,bottom:thin(GOLD),left:{style:BorderStyle.SINGLE,size:12,color:GOLD},right:noBorder}}
+          )]})]
         }));
       }
+      result.push(SP(60));
       continue;
     }
 
+    // Seitenumbruch VOR Blick nach vorne
     if(line.match(/^BLICK NACH VORNE/)){
-      result.push(SP(140));
+      result.push(new Paragraph({children:[new PageBreak()]}));
       var blickRows = [];
       i++;
       while(i < lines.length){
@@ -136,11 +151,11 @@ function berichtAbsaetze(text){
           ...blickRows
         ],{fill:GRAU,w:9026,b:leftB(GOLD,8),ml:240,mr:240,mt:80,mb:80})]})]
       }));
+      result.push(SP(120));
       continue;
     }
 
     if(line.match(/^WAS NACH UNSEREM GESPR/)){
-      result.push(SP(120));
       var wasRows = [];
       i++;
       while(i < lines.length){
