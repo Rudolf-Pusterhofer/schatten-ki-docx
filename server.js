@@ -89,7 +89,7 @@ function berichtAbsaetze(text){
     if(!line){ result.push(SP(80)); i++; continue; }
 
     // Vor erstem HANDLUNGSFELD: Überschrift "Ihre 3 wichtigsten Handlungsfelder" einfügen
-    if(line.match(/^HANDLUNGSFELD 1:/) && !handlungsfelderGezeigt){
+    if(line.match(/^HANDLUNGSFELD 1:/i) && !handlungsfelderGezeigt){
       handlungsfelderGezeigt = true;
       result.push(SP(160));
       result.push(new Table({width:{size:9026,type:WidthType.DXA},columnWidths:[200,8826],borders:noBorders,
@@ -101,8 +101,8 @@ function berichtAbsaetze(text){
       result.push(SP(40));
     }
 
-    if(line.match(/^HANDLUNGSFELD \d+:/)){
-      var m = line.match(/^(HANDLUNGSFELD \d+:)\s*(.*)/);
+    if(line.match(/^HANDLUNGSFELD \d+:/i)){
+      var m = line.match(/^(HANDLUNGSFELD \d+:)\s*(.*)/i);
       var titelNr = m ? m[1] : 'HANDLUNGSFELD:';
       var titelText = m ? m[2] : line;
       // Titelzeile: dunkler Hintergrund, goldene Nummer, weisser Titeltext
@@ -118,7 +118,7 @@ function berichtAbsaetze(text){
       var bodyLines = [];
       while(i < lines.length){
         var nx = lines[i].trim();
-        if(nx.match(/^(HANDLUNGSFELD \d+:|BLICK NACH VORNE|WAS NACH UNSEREM GESPR)/)) break;
+        if(nx.match(/^(HANDLUNGSFELD \d+:|BLICK NACH VORNE|WAS NACH UNSEREM GESPR)/i)) break;
         if(nx) bodyLines.push(nx);
         i++;
       }
@@ -135,13 +135,13 @@ function berichtAbsaetze(text){
     }
 
     // Seitenumbruch VOR Blick nach vorne
-    if(line.match(/^BLICK NACH VORNE/)){
+    if(line.match(/^BLICK NACH VORNE/i)){
       result.push(new Paragraph({children:[new PageBreak()]}));
       var blickRows = [];
       i++;
       while(i < lines.length){
         var nx = lines[i].trim();
-        if(nx.match(/^WAS NACH UNSEREM GESPR/)) break;
+        if(nx.match(/^WAS NACH UNSEREM GESPR/i)) break;
         if(nx) blickRows.push(P(nx,{size:21,color:TEXT,after:80}));
         i++;
       }
@@ -155,7 +155,7 @@ function berichtAbsaetze(text){
       continue;
     }
 
-    if(line.match(/^WAS NACH UNSEREM GESPR/)){
+    if(line.match(/^WAS NACH UNSEREM GESPR/i)){
       var wasRows = [];
       i++;
       while(i < lines.length){
